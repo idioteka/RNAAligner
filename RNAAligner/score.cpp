@@ -148,7 +148,7 @@ int calcMaxQuickScore(Config &config, vector<int> &offsets, vector<int> keys) {
 	return x+y;
 }
 
-int calcAffineScore(Config &config, vector<int> &loc_array, string &read) {
+int calcAffineScore(Config &config, vector<int> &loc_array, string &read, bool &isDirtyStart, bool &isDirtyStop, int &startError, int &stopError) {
 	int score = 0;
 	int lastLoc = -3;
 	int lastValue = -1;
@@ -212,28 +212,31 @@ int calcAffineScore(Config &config, vector<int> &loc_array, string &read) {
 	//cout << score << "\n";
 
 	int var = 0;
-	for(int i = 0; i < 30; i++) {
+	for(int i = 0; i < 39; i++) {
 		if(loc_array[i] < 0) {
 			var++;
-		}
+        }
 	}
-	if(var > 10) {
-		return 0;
+    
+	if(var > 9) {
+        isDirtyStart = true;
 	}
+    startError = var;
 	var = 0;
-	for(int i = loc_array.size()-1; i > loc_array.size()-30; i--) {
+	for(int i = loc_array.size()-1; i > loc_array.size()-40; i--) {
 		if(loc_array[i] < 0) {
 			var++;
 		}
 	}
-	if(var > 10) {
-		return 0;
+	if(var > 9) {
+        isDirtyStop = true;
 	}
-
+    stopError = var;
+    
 	return score;
 }
 
-int extendScore(Config &config, string &read, vector<int> &offsets, vector<int> &values, int center_index, vector<int> &loc_array, int num_hits, int num_approx_hits, string &whole_genome) {
+int extendScore(Config &config, string &read, vector<int> &offsets, vector<int> &values, int center_index, vector<int> &loc_array, int num_hits, int num_approx_hits, string &whole_genome, bool &isDirtyStart, bool &isDirtyStop, int &startError, int &stopError) {
 
 	int center_loc = values[center_index];
 	int min_loc = center_loc - config.MAX_INDEL;
@@ -352,7 +355,7 @@ int extendScore(Config &config, string &read, vector<int> &offsets, vector<int> 
 	out << endl;
 */
 
-	int score = calcAffineScore(config, loc_array, read);
+	int score = calcAffineScore(config, loc_array, read, isDirtyStart, isDirtyStop, startError, stopError);
 	//cout << "score: " << score << endl;
 	return score;
 }

@@ -116,6 +116,8 @@ void readReads(Config &config, vector<Read> &reads, map<int, FastaRead> &fastaRe
 		exit(-1);
 	}
 	string line;
+    string outfile = infile + "out";
+    ofstream ofs(outfile.c_str());
 
 	int br = 1;
 	while(getline(ifs, line)) {
@@ -123,9 +125,11 @@ void readReads(Config &config, vector<Read> &reads, map<int, FastaRead> &fastaRe
 		string first = to_string(br);
 		string second = lines[5];
 		FastaRead fr(first, second);
+        ofs << "> " + first << endl;
+        ofs << second << endl;
 		std::map<int,FastaRead>::iterator it2 = fastaReads.begin();
 		fastaReads.insert(it2, pair<int,FastaRead>(br, fr));
-		Result r = Result(br, atoi(lines[1].c_str()), atoi(lines[2].c_str()), 0, 0);
+		Result r = Result(br, atoi(lines[1].c_str()), atoi(lines[2].c_str()), 0, 0, false, false, second, 0, 0, 0);
 		r.matchString = lines[3];
 		gapArrayFromString(r.gapArray, lines[4]);
 		std::map<int,Result>::iterator it = results.begin();
@@ -146,18 +150,18 @@ string compressMatchString(string &matchString) {
 		if(current == matchString[i]) {
 			number++;
 		}
-		else if((current == 'm' && matchString[i] == 's') || (current == 's' && matchString[i] == 'm')) {
+		else if((current == 'M' && matchString[i] == 'S') || (current == 'S' && matchString[i] == 'M')) {
 			number++;
 		}
 		else {
-			if(current == 's') current = 'm';
+			if(current == 'S') current = 'M';
 			compressed += to_string(number);
 			compressed.push_back(current);
 			number = 1;
 			current = matchString[i];
 		}
 	}
-	if(current == 's') current = 'm';
+	if(current == 'S') current = 'M';
 	compressed += to_string(number);
 	compressed.push_back(current);
 	return compressed;
@@ -196,6 +200,11 @@ void writeSamResults(vector<Result> &set_of_results, vector<Read> &reads, map<in
 		FastaRead fr = pos->second;
 
 		out_res << (fr.name) << "\t";
+        if (r.strand == 1) {
+            out_res << 16 << "\t";
+        } else {
+            out_res << 0 << "\t";
+        }
 		for(unsigned j = 0; j < r.gapArray.size(); j+=2) {
 			out_res << r.gapArray[j] << "-" << r.gapArray[j+1];
 			if(j+2 != r.gapArray.size()) out_res << ",";
@@ -216,7 +225,7 @@ void writeSamResults(vector<Result> &set_of_results, vector<Read> &reads, map<in
 	}
 }
 
-void writeResults(Config &config, vector<Result> &set_of_results, map<int, Result> &correct_results, string infile) {
+void writeResults(Config &config, vector<Result> &set_of_results, map<int, Result> &correct_results, string infile, string &whole_genome) {
 
 	vector<Result> results;
 	for(unsigned int j = 0; j < set_of_results.size(); j++) {
@@ -225,6 +234,10 @@ void writeResults(Config &config, vector<Result> &set_of_results, map<int, Resul
 	cout << "size of results: " << results.size() << endl;
 	sortResults(results);
 	ofstream out_res(infile.c_str());
+    cout << infile << endl;
+    string dirtyOut = infile + "dirty3";
+    cout << dirtyOut << endl;
+    ofstream out_res_dirty(dirtyOut.c_str());
 	int br = 1;
 	for(unsigned int i = 0; i < results.size(); i++) {
 		Result r = results[i];
@@ -259,8 +272,50 @@ void writeResults(Config &config, vector<Result> &set_of_results, map<int, Resul
 		out_res << r.matchString << endl;
 		//out_res << whole_genome.substr(r.start, (r.stop - r.start)) << endl;
 		br++;
+        
+//        if(r.isDirtyStop && !r.isDirtyStart) {
+//            out_res_dirty << r.br << "-" << start << "-" << stop << "-" << (stop-start) << endl;
+//            out_res_dirty << r2.br << "-" << r2.start << "-" << r2.stop << "-" << (r2.stop-r2.start) << endl;
+//            out_res_dirty << 0 << endl;
+//            out_res_dirty << r.strand << endl;
+//            out_res_dirty << r.read << endl;
+//            out_res_dirty << whole_genome.substr(start, 32000) << endl;
+//        } else if(r.isDirtyStart && !r.isDirtyStop) {
+//            out_res_dirty << r.br << "-" << start << "-" << stop << "-" << (stop-start) << endl;
+//            out_res_dirty << r2.br << "-" << r2.start << "-" << r2.stop << "-" << (r2.stop-r2.start) << endl;
+//            out_res_dirty << 1 << endl;
+//            out_res_dirty << r.strand << endl;
+//            out_res_dirty << r.read << endl;
+//            int startPos = stop - 32000;
+//            if(startPos < 0) {
+//                startPos = 0;
+//            }
+//            out_res_dirty << whole_genome.substr(startPos, 32000) << endl;
+//        } else {
+        if (r.isDirtyStart || r.isDirtyStop) {
+            if (r.startError > r.stopError) {
+                out_res_dirty << r.br << "-" << start << "-" << stop << "-" << (stop-start) << endl;
+                out_res_dirty << r2.br << "-" << r2.start << "-" << r2.stop << "-" << (r2.stop-r2.start) << endl;
+                out_res_dirty << 1 << endl;
+                out_res_dirty << r.strand << endl;
+                out_res_dirty << r.read << endl;
+                int startPos = stop - 110000;
+                if(startPos < 0) {
+                    startPos = 0;
+                }
+                out_res_dirty << whole_genome.substr(startPos, 110000) << endl;
+            } else {
+                out_res_dirty << r.br << "-" << start << "-" << stop << "-" << (stop-start) << endl;
+                out_res_dirty << r2.br << "-" << r2.start << "-" << r2.stop << "-" << (r2.stop-r2.start) << endl;
+                out_res_dirty << 0 << endl;
+                out_res_dirty << r.strand << endl;
+                out_res_dirty << r.read << endl;
+                out_res_dirty << whole_genome.substr(start, 110000) << endl;
+            }
+        }
+//        }
 	}
-
+    out_res_dirty.close();
 	out_res.close();
 }
 

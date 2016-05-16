@@ -420,20 +420,59 @@ struct Config {
 	}
 };
 
+struct NeedWunshStruct {
+    int br;
+    int stopLocation;
+    int side;
+    int strand;
+    string read;
+    string reference;
+    int start;
+    int stop;
+    int correctStart;
+    int correctStop;
+    NeedWunshStruct(int br_, int stopLocation_, int side_, int strand_, string read_, string reference_, int start_, int stop_, int correctStart_, int correctStop_) {
+        br = br_;
+        stopLocation = stopLocation_;
+        side = side_;
+        strand = strand_;
+        read = read_;
+        reference = reference_;
+        start = start_;
+        stop = stop_;
+        correctStart = correctStart_;
+        correctStop = correctStop_;
+    }
+};
+
 struct Result {
 	int br;
 	int start;
 	int stop;
 	int score;
 	int maxScore;
+    int strand;
 	string matchString;
+    string read;
+    bool isDirtyStart;
+    bool isDirtyStop;
+    int startError;
+    int stopError;
 	vector<int> gapArray;
-	Result(int br_, int start_, int stop_, int score_, int maxScore_) {
+    Result() {
+    }
+	Result(int br_, int start_, int stop_, int score_, int maxScore_, bool isDirtyStart_, bool isDirtyStop_, string read_, int strand_, int startError_, int stopError_) {
 		br = br_;
 		start = start_;
 		stop = stop_;
 		score = score_;
 		maxScore = maxScore_;
+        isDirtyStart = isDirtyStart_;
+        isDirtyStop = isDirtyStop_;
+        startError = startError_;
+        stopError = stopError_;
+        read = read_;
+        strand = strand_;
 	}
 };
 
@@ -490,6 +529,10 @@ struct SiteScore {
 	int score;
 	int hits;
 	bool perfect;
+    bool isDirtyStart;
+    bool isDirtyStop;
+    int startError;
+    int stopError;
 	int strand;
 	vector<int> gapArray;
 	SiteScore() {
@@ -499,8 +542,12 @@ struct SiteScore {
 		hits = -1;
 		perfect = false;
 		strand = -1;
+        isDirtyStart = false;
+        isDirtyStop = false;
+        startError = 0;
+        stopError = 0;
 	}
-	SiteScore(int start_, int stop_, int score_, int hits_, bool perfect_, int strand_, vector<int> gapArray_) {
+    SiteScore(int start_, int stop_, int score_, int hits_, bool perfect_, int strand_, vector<int> gapArray_, bool isDirtyStart_, bool isDirtyStop_, int startError_, int stopError_) {
 		start = start_;
 		stop = stop_;
 		score = score_;
@@ -508,5 +555,9 @@ struct SiteScore {
 		perfect = perfect_;
 		strand = strand_;
 		gapArray = gapArray_;
+        isDirtyStart = isDirtyStart_;
+        isDirtyStop = isDirtyStop_;
+        startError = startError_;
+        stopError = stopError_;
 	}
 };

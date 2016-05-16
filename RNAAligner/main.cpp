@@ -19,6 +19,8 @@
 #include "statistics2.h"
 #include "parameters.h"
 #include "IO.h"
+#include "NeedlemanWunsch.h"
+#include "BBMapComapare.h"
 #include "second_phase.h"
 #include "config.h"
 
@@ -129,6 +131,12 @@ void align(Config &config, int bestScores[], vector<int> &keys, string &read, ve
     vector<int> starts;
     vector<int> stops;
     int get_hits = getHits(config, keys, config.MAX_LEN, starts, stops, sizes);
+//    cout << starts.size() << endl;
+//    for (int i = 0; i < starts.size(); i++) {
+//        cout << starts[i] << " " << stops[i]-starts[i] << endl;
+//    }
+//    cout << endl;
+    
     
     bool filter_by_qscore = (get_hits >= 5);
     int minScore = (int) (config.MIN_SCORE_MULT * max_score);
@@ -208,13 +216,18 @@ void align(Config &config, int bestScores[], vector<int> &keys, string &read, ve
             int mapStart = site;
             int mapStop = max_nearby_site;
             
+            bool isDirtyStart = false;
+            bool isDirtyStop = false;
+            int startError = 0;
+            int stopError = 0;
+            
             if(qscore < qcutoff){
                 score=-1;
             }else{
                 if(short_circuit && qscore == max_quick_score){
                     score = max_score;
                 }else{
-                    score = extendScore(config, read, offsets, sites_tmp, center_index, loc_array, get_hits, approx_hits, whole_genome);
+                    score = extendScore(config, read, offsets, sites_tmp, center_index, loc_array, get_hits, approx_hits, whole_genome, isDirtyStart, isDirtyStop, startError, stopError);
                     
                     int min = std::numeric_limits<int>::max();
                     int max = std::numeric_limits<int>::min();
@@ -330,13 +343,13 @@ void align(Config &config, int bestScores[], vector<int> &keys, string &read, ve
                         results[results.size()-1].score = betterScore;
                         //prevSS.setPerfect(bases); TODO add perfect set
                     }else{
-                        ss = SiteScore(site2, site3, score, approx_hits, perfect1, strand, gapArray);
+                        ss = SiteScore(site2, site3, score, approx_hits, perfect1, strand, gapArray, isDirtyStart, isDirtyStop, startError, stopError);
                         //printLocationArray(loc_array);
                         //if(!perfect1){ss.setPerfect(bases);} TODO add perfect set
                     }
                     
                 }else if(inbounds){
-                    ss = SiteScore(site2, site3, score, approx_hits, perfect1, strand, gapArray);
+                    ss = SiteScore(site2, site3, score, approx_hits, perfect1, strand, gapArray, isDirtyStart, isDirtyStop, startError, stopError);
                     //printLocationArray(loc_array);
                     //if(!perfect1){ss.setPerfect(bases);} TODO add perfect setter
                 }
@@ -391,6 +404,11 @@ void processRead(Config &config, int *sizes, int *sites, string &r1, vector<Resu
         vector<int> read_keys;
         getReadKeys(config, read, offsets, read_keys);
         vector<int> read_keys_copy = read_keys;
+        
+//        for (int i = 0; i < offsets.size(); i++) {
+//            cout << offsets[i] << " ";
+//        }
+//        cout << endl;
         
         int num_hits = countHits(config, read_keys_copy, sizes, config.MAX_LEN);
         num_hits = trimHits(config, read_keys, read_keys_copy, sizes, num_hits);
@@ -467,7 +485,7 @@ void processRead(Config &config, int *sizes, int *sites, string &r1, vector<Resu
         }
         
         if(results.size() != 0) {
-            makeMatchString(results, read, read_reverse, sizes, sites, resultsFinal, whole_genome, threadId, br, max_score);
+            Result r = makeMatchString(config, results, read, read_reverse, sizes, sites, resultsFinal, whole_genome, threadId, br, max_score);
             config.ALIGNED_BASE_NUM += read.size();
             Read rea(br, read);
             aligned_reads.push_back(rea);
@@ -488,7 +506,7 @@ void *preProcessRead(void *threadid) {
         Read read = (*(td->reads))[i];
         
         if(true) {
-            //		if((i+1)%100 == 0) cout << "Read: " << read.br << " started." << endl;
+            		if((i+1)%10 == 0) cout << "Read: " << read.br << " started." << endl;
         }
         /*if((i+1)%10 == 0)*/ //cout << "Read: " << read.br << " started." << endl;
         processRead(*(td->config), td->sizes, td->sites, read.content, *(td->results), *(td->aligned_reads), *(td->unaligned_reads), *(td->whole_genome),  td->thread_id, read.br);
@@ -603,6 +621,18 @@ void executeMethod(Statistic global_stat, Info &info, Config &config, int **res,
     
     cout << "Aligned reads: " << tmp_results.size() << endl;
     
+    int impossible = 0;
+    for (int i = 0; i < unaligned.size(); i++) {
+        Read reead = unaligned[i];
+        map<int, Result>::iterator pos = correct_results.find(reead.br);
+        Result r22 = pos->second;
+        if ((r22.stop - r22.start) > 32000) {
+            impossible++;
+        }
+    }
+    
+    cout << "imposssible: " << impossible << endl;
+    
     string addon = "";
     if(config.IS_SECOND_PHASE) {
         addon = "x";
@@ -612,12 +642,12 @@ void executeMethod(Statistic global_stat, Info &info, Config &config, int **res,
     startday = t1.tv_sec;
     startday2 = t1.tv_usec;
     if(!config.IS_SECOND_PHASE) {
-        writeResults(config, tmp_results, correct_results, config.OUTDIR + "//" + "results" + addon + build + ".txt");
-        //writeSamResults(tmp_results, reads, read_names, config.OUTDIR + "//" + "results" + addon + build + ".sam");
+//        writeResults(config, tmp_results, correct_results, config.OUTDIR + "//" + "results" + addon + build + ".txt", whole_genome);
+        writeSamResults(tmp_results, reads, read_names, config.OUTDIR + "//" + "resultst" + addon + build + ".txt");
     }
     else if(!config.SECOND_PHASE_MODE) {
-        writeResults(config, tmp_results, correct_results, config.OUTDIR + "//" + "results" + addon + build + ".txt");
-        //writeSamResults(tmp_results, reads, read_names, config.OUTDIR + "//" + "results" + addon + build + ".sam");
+//        writeResults(config, tmp_results, correct_results, config.OUTDIR + "//" + "results" + addon + build + ".txt", whole_genome);
+        writeSamResults(tmp_results, reads, read_names, config.OUTDIR + "//" + "resultst" + addon + build + ".txt");
     }
     gettimeofday(&t2, NULL);
     endday = t2.tv_sec;
@@ -664,9 +694,101 @@ void executeMethod(Statistic global_stat, Info &info, Config &config, int **res,
     
 }
 
+void readRealigners(vector<NeedWunshStruct> &realigners, string root) {
+    string infile = root + "/results1.txtdirty3";
+    ifstream ifs(infile.c_str());
+    if(!ifs) {
+        cout << "File " << infile << " does not exist." << endl;
+        exit(-1);
+    }
+    string line;
+    
+    while(getline(ifs, line)) {
+        //cout << line << endl;
+//        int br = atoi(line.c_str());
+//        getline(ifs, line);
+        vector<string> linesPrev = split(line, '-');
+        int correctStart = atoi(linesPrev[1].c_str());
+        int correctStop = atoi(linesPrev[2].c_str());
+        //cout << line << endl;
+        getline(ifs, line);
+        //cout << line << endl;
+        vector<string> lines = split(line, '-');
+        int br = atoi(lines[0].c_str());
+        int start = atoi(lines[1].c_str());
+        int stop = atoi(lines[2].c_str());
+        int location = atoi(lines[3].c_str());
+        getline(ifs, line);
+        //cout << line << endl;
+        int side = atoi(line.c_str());
+        getline(ifs, line);
+        //cout << line << endl;
+        int strand = atoi(line.c_str());
+        getline(ifs, line);
+        //cout << line << endl;
+        string read = line;
+        getline(ifs, line);
+        //cout << line << endl;
+        string reference = line;
+        
+        NeedWunshStruct nws = NeedWunshStruct(br, location, side, strand, read, reference, start, stop, correctStart, correctStop);
+        
+        realigners.push_back(nws);
+    }
+}
+
+void readBBMapResults(vector<Result> &results, string root) {
+    string infile = root + "/res5.txt";
+    ifstream ifs(infile.c_str());
+    if(!ifs) {
+        cout << "File " << infile << " does not exist." << endl;
+        exit(-1);
+    }
+    string line;
+    
+    while(getline(ifs, line)) {
+        
+        vector<string> lines = split(line, ' ');
+        int br = atoi(lines[1].c_str());
+        int start = atoi(lines[2].c_str());
+        int stop = atoi(lines[3].c_str());
+        int strand = atoi(lines[4].c_str());
+        
+        Result res = Result();
+        res.br = br;
+        res.start = start;
+        res.stop = stop;
+        res.strand = strand;
+        
+        results.push_back(res);
+    }
+}
+
 int main(int argc, char *argv[]) {
     
     Config config;
+//    vector<Result> BBMapResults;
+//    readBBMapResults(BBMapResults, argv[1]);
+//    map<int, Result> correctResults;
+//    vector<Read> readstmp;
+//    map<int, FastaRead> readnames;
+//    readReads(config, readstmp, readnames, correctResults, argv[2]);
+//    compareBBMap(BBMapResults, correctResults);
+//    return 0;
+
+//    vector<NeedWunshStruct> realigners;
+    
+//    readRealigners(realigners, argv[1]);
+    
+//    tryNeedlemanWunschWithAfinaGaps(realigners);
+    
+//    return 0;
+
+//    for (int i = 0; i < realigners.size(); i++) {
+//        tryNeedlemanWunschWithAfinaGaps(realigners[i]);
+//    }
+
+    
     Info info;
     Statistic global_stat;
     
@@ -679,7 +801,9 @@ int main(int argc, char *argv[]) {
     
     updatePrecision2(config, config.MULTY_PRECISION);
     
-    string genome_ref = argv[3];
+    string root = "";
+    
+    string genome_ref = root + argv[3];
     string whole_genome;
     bool read_index = createDirectories(config);
     vector<Read> tmp_unaligned_reads;
@@ -712,7 +836,7 @@ int main(int argc, char *argv[]) {
     vector<Read> reads;
     map<int, FastaRead> read_names;
     map<int, Result> correct_results;
-    readReads(config, reads, read_names, correct_results, argv[2]);
+    readReads(config, reads, read_names, correct_results, root + argv[2]);
     cout << reads.size();
     vector<Result> results;
     

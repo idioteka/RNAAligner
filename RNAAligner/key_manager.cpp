@@ -33,6 +33,7 @@ void makeOffsets(Config &config, string read, vector<int> &offsets) {
 
 	float interval = (read.size() - config.KEYLEN) / (float) (max(desiredKeysNumber - 1, 1));
 	float f = 0;
+//    cout << "start" << endl;
 
 	for(int i=0, j = 0; i < desiredKeysNumber; i++){
 		if(((unsigned int) round(f+interval)) > read.size()) {
@@ -41,7 +42,9 @@ void makeOffsets(Config &config, string read, vector<int> &offsets) {
 		offsets.push_back(j);
 
 		f += interval;
+//        cout << f << " " << (long) read.size() << endl;
 		j = min(((int) read.size() - config.KEYLEN), (max(j+1, (int) round(f))));
+//        cout << j << endl;
 	}
 }
 
@@ -165,13 +168,16 @@ int getHits(Config &config, vector<int> &keys, int max_len, vector<int> &starts,
 		stops.push_back(-1);
 		if(key >= 0){
 			int len = countKeyHits(config, key, sizes);
+//            cout << "len " << len << "  ";
 			if(len > 0 && len < max_len){
 				starts[i] = sizes[key];
 				stops[i] = starts[i] + len;
 				num_hits++;
-			}
+            }
 		}
 	}
+//    cout << endl;
+//    cout << endl;
 	return num_hits;
 }
 

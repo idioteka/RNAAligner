@@ -41,7 +41,7 @@ int scoreNoIndelsAndMakeMatchString(Config &config, string &read, string &ref, i
 				timeInMode = 0;
 				score += config.POINTS_MATCH;
 			}
-			match.push_back('m');
+			match.push_back('M');
 			mode = config.MODE_MS;
 		}else if(c<0 || c=='N'){
 			score+=config.POINTS_NOCALL;
@@ -50,7 +50,7 @@ int scoreNoIndelsAndMakeMatchString(Config &config, string &read, string &ref, i
 			score+=config.POINTS_NOREF;
 			match.push_back('N');
 		}else{
-			match.push_back('s');
+			match.push_back('S');
 			if(mode == config.MODE_SUB) {timeInMode++;}
 			else{timeInMode=0;}
 
@@ -315,9 +315,9 @@ void traceback(Config &config, string &read, string &ref, int refStartLoc, int r
 			char c=toupper(read[row-1]);
 			char r=toupper(ref[refStartLoc+col-1]);
 			if(c==r){
-				out.push_back('m');
+				out.push_back('M');
 			}else{
-				out.push_back('s');
+				out.push_back('S');
 			}
 			row--;
 			col--;
@@ -335,7 +335,7 @@ void traceback(Config &config, string &read, string &ref, int refStartLoc, int r
 				out.push_back('-');
 				gaps++;
 			}else{
-				out.push_back('d');
+				out.push_back('N');
 			}
 			col--;
 		}else{
@@ -350,7 +350,7 @@ void traceback(Config &config, string &read, string &ref, int refStartLoc, int r
 			if(col==0){
 				out.push_back('x');
 			}else{
-				out.push_back('i');
+				out.push_back('I');
 			}
 			row--;
 		}
@@ -391,7 +391,7 @@ void traceback(Config &config, string &read, string &ref, int refStartLoc, int r
 		}else{
 			int lim=j+config.GAPLEN;
 			for(; j<lim; j++){
-				out3.push_back('d');
+				out3.push_back('N');
 			}
 		}
 	}
@@ -454,7 +454,7 @@ void makeMatchStringForSite(Config &config, SiteScore ss, string &read, int *siz
 	//	r.precise_start = r.start;
 	//	r.precise_stop = r.stop;
 		for(unsigned int i = 0; i < read.size(); i++) {
-			r.matchString.push_back('m');
+			r.matchString.push_back('M');
 		}
 		return;
 	}
@@ -475,28 +475,31 @@ void makeMatchStringForSite(Config &config, SiteScore ss, string &read, int *siz
 	fillLimited(config, read, whole_genome, ss.start, ss.stop, score, ss.gapArray, max, r);
 }
 
-void makeMatchString(vector<SiteScore> &results, string &read, string &read_reverse, int *sizes, int *sites, vector<Result> &resultsFinal, string &whole_genome, int threadId, int br, int maxScore) {
+Result makeMatchString(Config &config, vector<SiteScore> &results, string &read, string &read_reverse, int *sizes, int *sites, vector<Result> &resultsFinal, string &whole_genome, int threadId, int br, int maxScore) {
 	int max_score = -9999;
 	SiteScore ss;
 
 	for(unsigned int i = 0; i < results.size(); i++) {
 		SiteScore s = results[i];
+        //cout << s.start << " " << s.stop << endl;
 		if(s.score > max_score) {
 			max_score = s.score;
 			SiteScore ress = results[i];
 			ss = results[i];
 		}
 	}
-	Result r = Result(br, ss.start, ss.stop, ss.score, maxScore);
+	Result r = Result(br, ss.start, ss.stop, ss.score, maxScore, ss.isDirtyStart, ss.isDirtyStop, read, ss.strand, ss.startError, ss.stopError);
 	r.gapArray = ss.gapArray;
 
-/*
+    
+    
 	if(ss.strand == 0) {
-		makeMatchStringForSite(ss, read, sizes, sites, r, whole_genome, threadId);
+		makeMatchStringForSite(config, ss, read, sizes, sites, r, whole_genome, threadId);
 	}
 	else {
-		makeMatchStringForSite(ss, read_reverse, sizes, sites, r, whole_genome, threadId);
+		makeMatchStringForSite(config, ss, read_reverse, sizes, sites, r, whole_genome, threadId);
 	}
-*/
+
 	resultsFinal.push_back(r);
+    return r;
 }

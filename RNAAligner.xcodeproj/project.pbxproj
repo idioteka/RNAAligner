@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC2CFB0A1B5BA73600B2902C /* NeedlemanWunsch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC2CFB081B5BA73600B2902C /* NeedlemanWunsch.cpp */; };
+		AC5F2F871B667E7F004D0FA0 /* BBMapComapare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC5F2F851B667E7F004D0FA0 /* BBMapComapare.cpp */; };
 		ACCB0F591B2E1D9C0029DAD6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACCB0F581B2E1D9C0029DAD6 /* main.cpp */; };
 		ACCB0F801B2E1E460029DAD6 /* aligner1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACCB0F601B2E1E460029DAD6 /* aligner1.cpp */; };
 		ACCB0F811B2E1E460029DAD6 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACCB0F631B2E1E460029DAD6 /* coverage.cpp */; };
@@ -38,6 +40,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AC2CFB081B5BA73600B2902C /* NeedlemanWunsch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NeedlemanWunsch.cpp; sourceTree = "<group>"; };
+		AC2CFB091B5BA73600B2902C /* NeedlemanWunsch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NeedlemanWunsch.h; sourceTree = "<group>"; };
+		AC5F2F851B667E7F004D0FA0 /* BBMapComapare.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BBMapComapare.cpp; sourceTree = "<group>"; };
+		AC5F2F861B667E7F004D0FA0 /* BBMapComapare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BBMapComapare.h; sourceTree = "<group>"; };
 		ACCB0F551B2E1D9C0029DAD6 /* RNAAligner */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RNAAligner; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACCB0F581B2E1D9C0029DAD6 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		ACCB0F601B2E1E460029DAD6 /* aligner1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligner1.cpp; sourceTree = "<group>"; };
@@ -71,6 +77,15 @@
 		ACCB0F7C1B2E1E460029DAD6 /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics.h; sourceTree = "<group>"; };
 		ACCB0F7D1B2E1E460029DAD6 /* statistics2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics2.cpp; sourceTree = "<group>"; };
 		ACCB0F7E1B2E1E460029DAD6 /* statistics2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics2.h; sourceTree = "<group>"; };
+		ACEE4CB41B4DCBB300E676DB /* align.info */ = {isa = PBXFileReference; lastKnownFileType = text; name = align.info; path = RNAAligner/newage/align.info; sourceTree = "<group>"; };
+		ACEE4CB51B4DCBB300E676DB /* genome.fa */ = {isa = PBXFileReference; lastKnownFileType = text; name = genome.fa; path = RNAAligner/newage/genome.fa; sourceTree = "<group>"; };
+		ACEE4CB61B4DCBB300E676DB /* in.bb */ = {isa = PBXFileReference; lastKnownFileType = text; name = in.bb; path = RNAAligner/newage/in.bb; sourceTree = "<group>"; };
+		ACEE4CB71B4DCBB300E676DB /* index1.info */ = {isa = PBXFileReference; lastKnownFileType = text; name = index1.info; path = RNAAligner/newage/index1.info; sourceTree = "<group>"; };
+		ACEE4CB81B4DCBB300E676DB /* results1.sam */ = {isa = PBXFileReference; lastKnownFileType = file; name = results1.sam; path = RNAAligner/newage/results1.sam; sourceTree = "<group>"; };
+		ACEE4CB91B4DCBB300E676DB /* results1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = results1.txt; path = RNAAligner/newage/results1.txt; sourceTree = "<group>"; };
+		ACEE4CBC1B4DCBB300E676DB /* statistics1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = statistics1.txt; path = RNAAligner/newage/statistics1.txt; sourceTree = "<group>"; };
+		ACEE4CBD1B4DCBB300E676DB /* statistics1.txtout */ = {isa = PBXFileReference; lastKnownFileType = text; name = statistics1.txtout; path = RNAAligner/newage/statistics1.txtout; sourceTree = "<group>"; };
+		ACEE4CBE1B4DCBB300E676DB /* unaligned.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = unaligned.txt; path = RNAAligner/newage/unaligned.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +102,7 @@
 		ACCB0F4C1B2E1D9C0029DAD6 = {
 			isa = PBXGroup;
 			children = (
+				ACEE4CB31B4DCB9200E676DB /* newage */,
 				ACCB0F571B2E1D9C0029DAD6 /* RNAAligner */,
 				ACCB0F561B2E1D9C0029DAD6 /* Products */,
 			);
@@ -135,8 +151,28 @@
 				ACCB0F7C1B2E1E460029DAD6 /* statistics.h */,
 				ACCB0F7D1B2E1E460029DAD6 /* statistics2.cpp */,
 				ACCB0F7E1B2E1E460029DAD6 /* statistics2.h */,
+				AC2CFB081B5BA73600B2902C /* NeedlemanWunsch.cpp */,
+				AC2CFB091B5BA73600B2902C /* NeedlemanWunsch.h */,
+				AC5F2F851B667E7F004D0FA0 /* BBMapComapare.cpp */,
+				AC5F2F861B667E7F004D0FA0 /* BBMapComapare.h */,
 			);
 			path = RNAAligner;
+			sourceTree = "<group>";
+		};
+		ACEE4CB31B4DCB9200E676DB /* newage */ = {
+			isa = PBXGroup;
+			children = (
+				ACEE4CB41B4DCBB300E676DB /* align.info */,
+				ACEE4CB51B4DCBB300E676DB /* genome.fa */,
+				ACEE4CB61B4DCBB300E676DB /* in.bb */,
+				ACEE4CB71B4DCBB300E676DB /* index1.info */,
+				ACEE4CB81B4DCBB300E676DB /* results1.sam */,
+				ACEE4CB91B4DCBB300E676DB /* results1.txt */,
+				ACEE4CBC1B4DCBB300E676DB /* statistics1.txt */,
+				ACEE4CBD1B4DCBB300E676DB /* statistics1.txtout */,
+				ACEE4CBE1B4DCBB300E676DB /* unaligned.txt */,
+			);
+			name = newage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,10 +234,12 @@
 				ACCB0F881B2E1E460029DAD6 /* match_string.cpp in Sources */,
 				ACCB0F821B2E1E460029DAD6 /* genome_index.cpp in Sources */,
 				ACCB0F831B2E1E460029DAD6 /* headers.cpp in Sources */,
+				AC2CFB0A1B5BA73600B2902C /* NeedlemanWunsch.cpp in Sources */,
 				ACCB0F871B2E1E460029DAD6 /* key_manager.cpp in Sources */,
 				ACCB0F811B2E1E460029DAD6 /* coverage.cpp in Sources */,
 				ACCB0F801B2E1E460029DAD6 /* aligner1.cpp in Sources */,
 				ACCB0F591B2E1D9C0029DAD6 /* main.cpp in Sources */,
+				AC5F2F871B667E7F004D0FA0 /* BBMapComapare.cpp in Sources */,
 				ACCB0F8C1B2E1E460029DAD6 /* second_phase.cpp in Sources */,
 				ACCB0F8B1B2E1E460029DAD6 /* score.cpp in Sources */,
 				ACCB0F8D1B2E1E460029DAD6 /* statistics.cpp in Sources */,
@@ -297,6 +335,7 @@
 		ACCB0F5D1B2E1D9C0029DAD6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INSTALL_PATH = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -304,6 +343,7 @@
 		ACCB0F5E1B2E1D9C0029DAD6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INSTALL_PATH = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -327,6 +367,7 @@
 				ACCB0F5E1B2E1D9C0029DAD6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

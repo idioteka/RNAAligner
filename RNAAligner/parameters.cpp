@@ -142,12 +142,14 @@ int readParams(int argc, char *argv[], Config &config, Info &info) {
 	struct stat sb;
 	cout << "Program started: " << endl;
 
+    string root = "";
+    
 	if (stat(argv[1], &sb) == 0 && S_ISDIR(sb.st_mode)) {
 		config.OUTDIR = argv[1];
 		cout << "Results will be stored in '" << config.OUTDIR << "'." << endl;
 	}
 	else {
-		config.OUTDIR = argv[1];
+		config.OUTDIR = root + argv[1];
 		const string out = "mkdir -p " + config.OUTDIR;
 		if(system(out.c_str())) {
 			cout << "Unable to create directory '" << config.OUTDIR << "'." << endl;

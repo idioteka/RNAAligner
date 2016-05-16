@@ -18,6 +18,6 @@ void fillLimited(string &read, string &ref, int refStartLoc, int refEndLoc, int 
 		vector<int> &gaps, long max[], Result &r);
 void makeMatchStringForSite(SiteScore ss, string &read, int *sizes,
 		int *sites, Result &r, string &whole_genome, int threadId);
-void makeMatchString(vector<SiteScore> &results, string &read, string &read_reverse,
+Result makeMatchString(Config &config, vector<SiteScore> &results, string &read, string &read_reverse,
 		int *sizes, int *sites, vector<Result> &resultsFinal, string &whole_genome,
 		int threadId, int br, int maxScore);

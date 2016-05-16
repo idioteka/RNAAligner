@@ -215,46 +215,176 @@ void writeStatistics2(Config &config, vector<Result> &results, map<int, Result> 
 
 	string tmp = infile + "out";
 	ofstream out(tmp.c_str());
+    
+    int resultClean = 0;
+    int resultStart = 0;
+    int resultStop = 0;
+    int resultDirty = 0;
+    
+    int correctClean = 0;
+    int correctStart = 0;
+    int correctStop = 0;
+    int correctDirty = 0;
+    
+    int bothClean = 0;
+    int bothStart = 0;
+    int bothStop = 0;
+    int bothDirty = 0;
+    
+    double resultCleanAvg = 0;
+    double resultStartAvg = 0;
+    double resultStopAvg = 0;
+    double resultDirtyAvg = 0;
+    
+    double correctCleanAvg = 0;
+    double correctStartAvg = 0;
+    double correctStopAvg = 0;
+    double correctDirtyAvg = 0;
+    
+    double bothCleanAvg = 0;
+    double bothStartAvg = 0;
+    double bothStopAvg = 0;
+    double bothDirtyAvg = 0;
+    
+    int impossible = 0;
 
 	for(unsigned int i = 0; i < results.size(); i++) {
 		Result r1 = results[i];
 		map<int, Result>::iterator pos = correct_results.find(r1.br);
 		Result r2 = pos->second;
 
+        if (r1.isDirtyStart && r1.isDirtyStop) {
+            resultDirty++;
+            resultDirtyAvg += r1.stopError;
+            resultDirtyAvg += r1.startError;
+        } else if (r1.isDirtyStart) {
+            resultStart++;
+            resultStartAvg += r1.startError;
+        } else if (r1.isDirtyStop) {
+            resultStop++;
+            resultStopAvg += r1.stopError;
+        } else {
+            resultClean++;
+            resultCleanAvg += r1.startError;
+            resultCleanAvg += r1.stopError;
+        }
+        
+        if(abs(r1.start-r2.start) < 15 && abs(r1.stop-r2.stop) < 15)  {
+            correctClean++;
+            correctCleanAvg += r1.stopError;
+            correctCleanAvg += r1.startError;
+        } else if(abs(r1.start-r2.start) < 15) {
+            correctStop++;
+            correctStopAvg += r1.stopError;
+        } else if (abs(r1.stop-r2.stop) < 15) {
+            correctStart++;
+            correctStartAvg += r1.startError;
+        } else {
+            correctDirty++;
+            correctDirtyAvg += r1.startError;
+            correctDirtyAvg += r1.stopError;
+        }
+        
+        if(abs(r1.start-r2.start) > 15 && abs(r1.stop-r2.stop) > 15 && r1.isDirtyStart && r1.isDirtyStop)  {
+            bothDirty++;
+            bothDirtyAvg += r1.stopError;
+            bothDirtyAvg += r1.startError;
+        } else if(abs(r1.start-r2.start) > 15 && r1.isDirtyStart && abs(r1.stop-r2.stop) < 15 && !r1.isDirtyStop) {
+            bothStart++;
+            bothStartAvg += r1.startError;
+        } else if (abs(r1.stop-r2.stop) > 15 && r1.isDirtyStop && abs(r1.start-r2.start) < 15 && !r1.isDirtyStart) {
+            bothStop++;
+            bothStopAvg += r1.stopError;
+        } else if(abs(r1.start-r2.start) < 15 && abs(r1.stop-r2.stop) < 15 && !r1.isDirtyStart && !r1.isDirtyStop) {
+            bothClean++;
+            bothCleanAvg += r1.startError;
+            bothCleanAvg += r1.stopError;
+        }
+        
+        if (r2.stop - r2.start > 32000) {
+            impossible++;
+        }
+        
 		out << r1.br;
-
-		if (r1.br == 20) {
-			int aaaa = 10;
-		}
 
 		int startOf = r1.start-r2.start;
 		int stopOf = r1.stop-r2.stop;
 
 		if(abs(r1.start-r2.start) < 15) {
 			out << "\t1";
+            
 		} else {
+            //correctStart++;
 			out << "\t0";
 		}
 		if(abs(r1.stop-r2.stop) < 15) {
 			out << "\t1";
 		} else {
+            
+           // correctStop++;
 			out << "\t0";
 		}
 		if(abs(r1.start-r2.start) < 15 && abs(r1.stop-r2.stop) < 15) {
 			out << "\t1";
+           // correctClean++;
 		} else {
 			out << "\t0";
 		}
+        
+        if(abs(r1.start-r2.start) > 15 && abs(r1.stop-r2.stop) > 15) {
+            out << "\t1";
+         //   correctDirty++;
+        } else {
+            out << "\t0";
+        }
+        
 		if(abs(r1.start-r2.start) < 15 || abs(r1.stop-r2.stop) < 15) {
 			out << "\t1";
 		} else {
 			out << "\t0";
 		}
 		out << "\n";
+        
+//        if (r1.isDirtyStart && r1.isDirtyStop) {
+//            continue;
+//        }
 
 		calculateStatistics22(r1, r2, statistic);
 		calculateStatistics32(r1, r2, statistic);
 	}
+    
+    cout << "Result clean: " << resultClean << endl;
+    cout << "Result start: " << resultStart << endl;
+    cout << "Result stop: " << resultStop << endl;
+    cout << "Result dirty: " << resultDirty << endl;
+    
+    cout << "Correct clean: " << correctClean << endl;
+    cout << "Correct start: " << correctStart << endl;
+    cout << "Correct stop: " << correctStop << endl;
+    cout << "Correct dirty: " << correctDirty << endl;
+    
+    cout << "Both clean: " << bothClean << endl;
+    cout << "Both start: " << bothStart << endl;
+    cout << "Both stop: " << bothStop << endl;
+    cout << "Both dirty: " << bothDirty << endl;
+    
+    cout << "Result clean avg: " << resultCleanAvg / resultClean << endl;
+    cout << "Result start avg: " << resultStartAvg / resultStart << endl;
+    cout << "Result stop avg: " << resultStopAvg / resultStop << endl;
+    cout << "Result dirty avg: " << resultDirtyAvg / resultDirty << endl;
+    
+    cout << "Correct clean avg: " << correctCleanAvg / correctClean << endl;
+    cout << "Correct start avg: " << correctStartAvg / correctStart << endl;
+    cout << "Correct stop avg: " << correctStopAvg / correctStop << endl;
+    cout << "Correct dirty avg: " << correctDirtyAvg / correctDirty << endl;
+    
+    cout << "Both clean avg: " << bothCleanAvg / bothClean << endl;
+    cout << "Both start avg: " << bothStartAvg / bothStart << endl;
+    cout << "Both stop avg: " << bothStopAvg / bothStop << endl;
+    cout << "Both dirty avg: " << bothDirtyAvg / bothDirty << endl;
+    
+    cout << "impossible: " << impossible << endl;
+    
 	statistic.unaligned_reads = statistic.total_reads - statistic.aligned_reads;
 
 	writeTotalStatistics2(config, infile, sssfile, statistic);
